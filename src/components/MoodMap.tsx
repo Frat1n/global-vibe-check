@@ -2,15 +2,6 @@
 import React, { useEffect, useRef } from 'react';
 import { MoodEntry, MoodType } from '@/types/mood';
 
-// Mock data for demonstration
-const mockMoodData: MoodEntry[] = [
-  { id: '1', mood: 'happy', lat: 40.7128, lng: -74.0060, timestamp: new Date(), city: 'New York' },
-  { id: '2', mood: 'calm', lat: 51.5074, lng: -0.1278, timestamp: new Date(), city: 'London' },
-  { id: '3', mood: 'excited', lat: 35.6762, lng: 139.6503, timestamp: new Date(), city: 'Tokyo' },
-  { id: '4', mood: 'sad', lat: -33.8688, lng: 151.2093, timestamp: new Date(), city: 'Sydney' },
-  { id: '5', mood: 'stressed', lat: 34.0522, lng: -118.2437, timestamp: new Date(), city: 'Los Angeles' },
-];
-
 const moodColors: Record<MoodType, string> = {
   happy: '#fbbf24',
   sad: '#60a5fa',
@@ -26,33 +17,45 @@ interface MoodMapProps {
 
 const MoodMap = ({ moodEntries }: MoodMapProps) => {
   const mapContainer = useRef<HTMLDivElement>(null);
-  const mapInstance = useRef<any>(null);
 
   useEffect(() => {
     if (!mapContainer.current) return;
 
-    // For MVP, we'll use a simple SVG world map visualization
-    // In production, this would be replaced with an actual map library like Leaflet or Mapbox
-    
-    const allEntries = [...mockMoodData, ...moodEntries];
-    
-    // Create a simple grid-based mood visualization
+    // Create a grid-based mood visualization using real data
     const moodGrid = document.createElement('div');
     moodGrid.className = 'grid grid-cols-8 gap-1 h-full p-4';
     
-    // Create mood bubbles to represent global moods
-    for (let i = 0; i < 64; i++) {
+    // If we have real entries, use them; otherwise show empty state
+    const entriesToShow = moodEntries.length > 0 ? moodEntries : [];
+    const totalBubbles = 64;
+    
+    for (let i = 0; i < totalBubbles; i++) {
       const bubble = document.createElement('div');
-      const randomMood = allEntries[i % allEntries.length]?.mood || 'calm';
-      const color = moodColors[randomMood];
       
-      bubble.className = 'aspect-square rounded-full animate-pulse-soft transition-all duration-500 hover:scale-125 cursor-pointer';
-      bubble.style.backgroundColor = color;
-      bubble.style.opacity = '0.7';
-      bubble.title = `Mood: ${randomMood}`;
+      // Use real mood data if available, otherwise create empty bubbles
+      if (i < entriesToShow.length) {
+        const entry = entriesToShow[i];
+        const color = moodColors[entry.mood];
+        
+        bubble.className = 'aspect-square rounded-full animate-pulse-soft transition-all duration-500 hover:scale-125 cursor-pointer';
+        bubble.style.backgroundColor = color;
+        bubble.style.opacity = '0.8';
+        bubble.title = `Mood: ${entry.mood}${entry.city ? ` from ${entry.city}` : ''}${entry.message ? `\nMessage: ${entry.message.slice(0, 100)}${entry.message.length > 100 ? '...' : ''}` : ''}`;
+        
+        // Add click handler to show mood details
+        bubble.addEventListener('click', () => {
+          console.log('Mood entry:', entry);
+        });
+      } else {
+        // Empty bubble for visual consistency
+        bubble.className = 'aspect-square rounded-full bg-muted/20 border border-muted/30';
+        bubble.style.opacity = '0.3';
+      }
       
-      // Add random delay to animation
-      bubble.style.animationDelay = `${Math.random() * 2}s`;
+      // Add random delay to animation for active bubbles
+      if (i < entriesToShow.length) {
+        bubble.style.animationDelay = `${Math.random() * 2}s`;
+      }
       
       moodGrid.appendChild(bubble);
     }

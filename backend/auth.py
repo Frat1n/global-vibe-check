@@ -1,5 +1,3 @@
-<file>
-      <absolute_file_name>/app/backend/auth.py</absolute_file_name>
 """
 MongoDB-based Authentication System
 
@@ -202,5 +200,3 @@ class AuthService:
             user.pop('password_hash', None)
             user.pop('verification_token', None)
         return user
-</content>
-    </file>

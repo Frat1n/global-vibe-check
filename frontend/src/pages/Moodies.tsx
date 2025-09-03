@@ -12,9 +12,8 @@
  * The page combines content consumption and creation in a social video format.
  */
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
@@ -43,15 +42,79 @@ const MOOD_FILTERS: { type: MoodType; emoji: string; color: string; description:
   { type: 'anxious', emoji: '😟', color: 'bg-purple-500', description: 'Support & Understanding' },
 ];
 
+interface MoodieStats {
+  totalMoodies: number;
+  totalCreators: number;
+  totalLikes: number;
+  newToday: number;
+}
+
 const Moodies: React.FC = () => {
   // Component state
   const [selectedMoodFilter, setSelectedMoodFilter] = useState<MoodType | null>(null);
   const [showUploadModal, setShowUploadModal] = useState(false);
-  const [feedKey, setFeedKey] = useState(0); // For refreshing feed after upload
+  const [feedKey, setFeedKey] = useState(0);
+  const [stats, setStats] = useState<MoodieStats>({
+    totalMoodies: 0,
+    totalCreators: 0,
+    totalLikes: 0,
+    newToday: 0
+  });
+  const [loading, setLoading] = useState(true);
 
   // Hooks
   const { user, signOut, isLoading } = useAuth();
   const navigate = useNavigate();
+
+  /**
+   * Fetch real Moodies statistics from backend
+   */
+  const fetchMoodieStats = async () => {
+    try {
+      setLoading(true);
+      const backendUrl = import.meta.env.REACT_APP_BACKEND_URL || 'http://localhost:8001';
+      
+      // Fetch basic moodies to calculate stats
+      const response = await fetch(`${backendUrl}/api/moodies?limit=1000`);
+      
+      if (response.ok) {
+        const moodies = await response.json();
+        
+        // Calculate real stats from actual data
+        const totalLikes = moodies.reduce((sum: number, moodie: any) => sum + (moodie.likes_count || 0), 0);
+        const uniqueCreators = new Set(moodies.map((moodie: any) => moodie.user_id)).size;
+        const today = new Date().toDateString();
+        const newToday = moodies.filter((moodie: any) => 
+          new Date(moodie.created_at).toDateString() === today
+        ).length;
+
+        setStats({
+          totalMoodies: moodies.length,
+          totalCreators: uniqueCreators,
+          totalLikes: totalLikes,
+          newToday: newToday
+        });
+      } else {
+        // If no data available, show zeros
+        setStats({
+          totalMoodies: 0,
+          totalCreators: 0,
+          totalLikes: 0,
+          newToday: 0
+        });
+      }
+    } catch (error) {
+      console.error('Error fetching moodie stats:', error);
+      setStats({
+        totalMoodies: 0,
+        totalCreators: 0,
+        totalLikes: 0,
+        newToday: 0
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
 
   /**
    * Handle mood filter selection
@@ -64,8 +127,9 @@ const Moodies: React.FC = () => {
    * Handle successful upload
    */
   const handleUploadComplete = () => {
-    // Refresh the feed by updating the key
+    // Refresh the feed and stats
     setFeedKey(prev => prev + 1);
+    fetchMoodieStats();
   };
 
   /**
@@ -74,6 +138,11 @@ const Moodies: React.FC = () => {
   const handleBackToHome = () => {
     navigate('/');
   };
+
+  // Fetch stats on component mount
+  useEffect(() => {
+    fetchMoodieStats();
+  }, []);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-pink-50">
@@ -136,7 +205,7 @@ const Moodies: React.FC = () => {
           </div>
         </div>
 
-        {/* Stats Cards */}
+        {/* Real Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
           <Card className="glass-card p-4">
             <div className="flex items-center gap-3">
@@ -144,8 +213,10 @@ const Moodies: React.FC = () => {
                 <TrendingUp className="w-5 h-5 text-purple-600" />
               </div>
               <div>
-                <p className="text-2xl font-bold">1.2K</p>
-                <p className="text-xs text-muted-foreground">Trending Moodies</p>
+                <p className="text-2xl font-bold">
+                  {loading ? '...' : stats.totalMoodies}
+                </p>
+                <p className="text-xs text-muted-foreground">Total Moodies</p>
               </div>
             </div>
           </Card>
@@ -156,7 +227,9 @@ const Moodies: React.FC = () => {
                 <Users className="w-5 h-5 text-pink-600" />
               </div>
               <div>
-                <p className="text-2xl font-bold">8.5K</p>
+                <p className="text-2xl font-bold">
+                  {loading ? '...' : stats.totalCreators}
+                </p>
                 <p className="text-xs text-muted-foreground">Active Creators</p>
               </div>
             </div>
@@ -168,8 +241,10 @@ const Moodies: React.FC = () => {
                 <Heart className="w-5 h-5 text-red-600" />
               </div>
               <div>
-                <p className="text-2xl font-bold">45K</p>
-                <p className="text-xs text-muted-foreground">Likes Today</p>
+                <p className="text-2xl font-bold">
+                  {loading ? '...' : stats.totalLikes}
+                </p>
+                <p className="text-xs text-muted-foreground">Total Likes</p>
               </div>
             </div>
           </Card>
@@ -180,7 +255,9 @@ const Moodies: React.FC = () => {
                 <Sparkles className="w-5 h-5 text-yellow-600" />
               </div>
               <div>
-                <p className="text-2xl font-bold">156</p>
+                <p className="text-2xl font-bold">
+                  {loading ? '...' : stats.newToday}
+                </p>
                 <p className="text-xs text-muted-foreground">New Today</p>
               </div>
             </div>

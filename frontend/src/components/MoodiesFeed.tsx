@@ -127,8 +127,8 @@ const MoodiesFeed: React.FC<MoodiesFeedProps> = ({
       console.error('Error fetching moodies:', error);
       setError('Failed to load moodies. Please try again.');
       
-      // Show sample data for demonstration
-      setMoodies(getSampleMoodies());
+      // Don't show sample data anymore, just empty state
+      setMoodies([]);
       
     } finally {
       setLoading(false);

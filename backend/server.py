@@ -33,7 +33,11 @@ from datetime import datetime, timedelta
 import json
 
 # Import AI capabilities
-from emergentintegrations import openai_assistant
+try:
+    from emergentintegrations import openai_assistant
+except ImportError:
+    # Fallback if emergentintegrations is not available
+    openai_assistant = None
 
 # Import our MongoDB authentication system
 from auth import AuthService, UserCreate, UserLogin

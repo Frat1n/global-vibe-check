@@ -149,8 +149,8 @@ const MoodieUpload: React.FC<MoodieUploadProps> = ({
       // Get backend URL from environment
       const backendUrl = import.meta.env.REACT_APP_BACKEND_URL || 'http://localhost:8001';
       
-      // Get user token (simplified for demo)
-      const userToken = localStorage.getItem('user_token') || 'demo_user_123';
+      // Get user token (using MongoDB auth token)
+      const userToken = localStorage.getItem('auth_token') || 'demo_user_123';
 
       // Create form data for file upload
       const formData = new FormData();

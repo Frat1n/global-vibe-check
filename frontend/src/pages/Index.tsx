@@ -28,6 +28,15 @@ const Index = () => {
               MoodMaps
             </h1>
             <div className="flex-1 flex justify-end gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => navigate('/moodies')}
+                className="bg-gradient-to-r from-purple-600 to-pink-600 text-white border-0 hover:opacity-90"
+              >
+                <Video className="w-4 h-4 mr-2" />
+                Moodies
+              </Button>
               {user ? (
                 <div className="flex items-center gap-2">
                   <span className="text-sm text-muted-foreground hidden sm:inline">

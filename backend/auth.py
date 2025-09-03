@@ -1,6 +1,6 @@
 <file>
       <absolute_file_name>/app/backend/auth.py</absolute_file_name>
-      <content">"""
+      <content>"""
 MongoDB-based Authentication System
 
 This module handles user authentication, registration, and email verification

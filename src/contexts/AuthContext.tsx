@@ -142,7 +142,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const signUp = async (email: string, password: string, displayName?: string) => {
     const redirectUrl = `${window.location.origin}/`;
     
-    const { error } = await supabase.auth.signUp({
+    const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
@@ -154,15 +154,39 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     });
     
     if (error) {
-      toast({
-        title: "Sign Up Failed",
-        description: error.message,
-        variant: "destructive",
-      });
+      if (error.message.includes('already registered')) {
+        // Try to resend confirmation email for existing unconfirmed users
+        const { error: resendError } = await supabase.auth.resend({
+          type: 'signup',
+          email: email,
+          options: {
+            emailRedirectTo: redirectUrl,
+          },
+        });
+        
+        if (resendError) {
+          toast({
+            title: "Sign Up Failed",
+            description: "This email is already registered. If you haven't verified your account, please check your email for the verification link.",
+            variant: "destructive",
+          });
+        } else {
+          toast({
+            title: "Confirmation Email Resent",
+            description: "We've sent a new verification email. Please check your inbox and spam folder.",
+          });
+        }
+      } else {
+        toast({
+          title: "Sign Up Failed",
+          description: error.message,
+          variant: "destructive",
+        });
+      }
     } else {
       toast({
         title: "Welcome to MoodMaps!",
-        description: "Please check your email to verify your account.",
+        description: "Please check your email to verify your account. Check your spam folder if you don't see it.",
       });
     }
     

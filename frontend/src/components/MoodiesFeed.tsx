@@ -182,7 +182,7 @@ const MoodiesFeed: React.FC<MoodiesFeedProps> = ({
   const toggleLike = async (moodieId: string) => {
     try {
       const backendUrl = import.meta.env.REACT_APP_BACKEND_URL || 'http://localhost:8001';
-      const userToken = localStorage.getItem('user_token') || 'demo_user_123';
+      const userToken = localStorage.getItem('auth_token') || 'demo_user_123';
 
       const response = await fetch(`${backendUrl}/api/like`, {
         method: 'POST',

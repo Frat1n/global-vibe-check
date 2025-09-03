@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { LogIn, LogOut } from 'lucide-react';
 import MoodSelector from '@/components/MoodSelector';
 import MoodMap from '@/components/MoodMap';
+import LeafletMap from '@/components/LeafletMap';
 import MoodStats from '@/components/MoodStats';
 import PremiumModal from '@/components/PremiumModal';
 import MessagingModal from '@/components/MessagingModal';

@@ -3,6 +3,7 @@ MoodMaps Backend Server
 
 Enhanced FastAPI backend for the MoodMaps social emotional sharing platform.
 Provides comprehensive API endpoints for:
+- MongoDB-based authentication with email verification
 - Mood tracking and analytics
 - Social features (followers, likes, comments)
 - Video uploads and recommendations (Moodies)
@@ -11,9 +12,9 @@ Provides comprehensive API endpoints for:
 
 Dependencies:
 - FastAPI for REST API
-- MongoDB for data persistence
+- MongoDB for data persistence and authentication
 - EmergentIntegrations for AI capabilities
-- Supabase integration for user management
+- JWT for secure authentication
 """
 
 from fastapi import FastAPI, APIRouter, HTTPException, UploadFile, File, Form, Depends
@@ -25,14 +26,17 @@ import os
 import logging
 import base64
 from pathlib import Path
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, EmailStr
 from typing import List, Optional, Dict, Any
 import uuid
 from datetime import datetime, timedelta
 import json
 
-# Import AI capabilities (temporarily disabled due to import issues)
-# from emergentintegrations.llm import openai_assistant
+# Import AI capabilities
+from emergentintegrations import openai_assistant
+
+# Import our MongoDB authentication system
+from auth import AuthService, UserCreate, UserLogin
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')

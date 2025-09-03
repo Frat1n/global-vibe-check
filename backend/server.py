@@ -226,6 +226,53 @@ async def root():
     """Health check endpoint"""
     return {"message": "MoodMaps API v2.0 - Social Emotional Platform with MongoDB Authentication"}
 
+# Authentication Endpoints
+@api_router.post("/auth/register")
+async def register(user_data: UserCreate):
+    """Register a new user with email verification"""
+    try:
+        result = await auth_service.register_user(user_data)
+        return result
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Registration failed: {str(e)}")
+
+@api_router.post("/auth/login")
+async def login(login_data: UserLogin):
+    """Login user and return JWT token"""
+    try:
+        result = await auth_service.login_user(login_data)
+        return result
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Login failed: {str(e)}")
+
+@api_router.get("/auth/verify/{token}")
+async def verify_email(token: str):
+    """Verify user email with token"""
+    try:
+        result = await auth_service.verify_email(token)
+        return result
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Email verification failed: {str(e)}")
+
+@api_router.get("/auth/me")
+async def get_current_user(user_id: str = Depends(verify_user_token)):
+    """Get current user information"""
+    try:
+        user = await auth_service.get_user_by_id(user_id)
+        if not user:
+            raise HTTPException(status_code=404, detail="User not found")
+        return user
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to get user: {str(e)}")
+
 # Mood Tracking Endpoints
 @api_router.post("/moods", response_model=MoodEntry)
 async def create_mood_entry(

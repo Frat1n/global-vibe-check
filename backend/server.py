@@ -188,65 +188,32 @@ async def get_ai_mood_recommendations(user_id: str, recent_moods: List[str]) -> 
     """
     try:
         if not EMERGENT_LLM_KEY:
-            # Return fallback recommendations when AI is not available
-            return [
-                {
-                    "activity": "Take a 10-minute walk outside",
-                    "explanation": "Fresh air and light exercise can boost mood naturally",
-                    "mood_benefit": "stress relief"
-                },
-                {
-                    "activity": "Practice deep breathing for 5 minutes",
-                    "explanation": "Controlled breathing activates the relaxation response",
-                    "mood_benefit": "anxiety reduction"
-                },
-                {
-                    "activity": "Listen to your favorite upbeat music",
-                    "explanation": "Music can trigger positive emotions and memories",
-                    "mood_benefit": "happiness boost"
-                }
-            ]
+            return []
         
-        # For now, return fallback recommendations until AI integration is fixed
+        # Create prompt for mood-based recommendations
         mood_context = ", ".join(recent_moods[-5:])  # Last 5 moods
+        prompt = f"""
+        Based on a user's recent moods: {mood_context}
         
-        # Simple mood-based recommendations
-        if "sad" in recent_moods or "stressed" in recent_moods:
-            return [
-                {
-                    "activity": "Call a friend or family member",
-                    "explanation": "Social connection can help improve mood and reduce stress",
-                    "mood_benefit": "emotional support"
-                },
-                {
-                    "activity": "Try gentle yoga or stretching",
-                    "explanation": "Physical movement helps release tension and stress",
-                    "mood_benefit": "stress relief"
-                },
-                {
-                    "activity": "Write in a gratitude journal",
-                    "explanation": "Focusing on positive aspects can shift perspective",
-                    "mood_benefit": "mood improvement"
-                }
-            ]
-        else:
-            return [
-                {
-                    "activity": "Share your positive energy with others",
-                    "explanation": "Spreading joy can amplify your own happiness",
-                    "mood_benefit": "sustained happiness"
-                },
-                {
-                    "activity": "Try a new creative activity",
-                    "explanation": "Creativity can maintain and enhance positive moods",
-                    "mood_benefit": "continued excitement"
-                },
-                {
-                    "activity": "Plan something fun for the weekend",
-                    "explanation": "Having something to look forward to boosts mood",
-                    "mood_benefit": "anticipation and joy"
-                }
-            ]
+        Provide 3 personalized recommendations for improving their emotional well-being.
+        Each recommendation should include:
+        1. Activity suggestion
+        2. Brief explanation (max 50 words)
+        3. Mood benefit (which mood it helps with)
+        
+        Format as JSON array with keys: activity, explanation, mood_benefit
+        """
+        
+        # Call AI service
+        response = await openai_assistant.create_completion(
+            messages=[{"role": "user", "content": prompt}],
+            api_key=EMERGENT_LLM_KEY,
+            model="gpt-4o-mini"
+        )
+        
+        # Parse AI response
+        recommendations = json.loads(response.choices[0].message.content)
+        return recommendations[:3]  # Limit to 3 recommendations
         
     except Exception as e:
         logging.error(f"AI recommendation error: {e}")

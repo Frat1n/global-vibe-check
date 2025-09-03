@@ -65,6 +65,33 @@ const Auth = () => {
 
           <TabsContent value="signin">
             <form onSubmit={handleSignIn} className="space-y-4">
+              {/* Demo Login Button */}
+              <Button
+                type="button"
+                variant="outline"
+                className="w-full mb-4 bg-gradient-to-r from-green-500 to-blue-500 text-white border-0"
+                onClick={() => {
+                  setEmail('demo@moodmaps.com');
+                  setPassword('demo123');
+                  // Auto-login with demo credentials
+                  setTimeout(() => {
+                    localStorage.setItem('user_token', 'demo_user_123');
+                    window.location.reload();
+                  }, 100);
+                }}
+              >
+                🚀 Quick Demo Login (Skip Email)
+              </Button>
+              
+              <div className="relative">
+                <div className="absolute inset-0 flex items-center">
+                  <span className="w-full border-t border-muted/30" />
+                </div>
+                <div className="relative flex justify-center text-xs uppercase">
+                  <span className="bg-background px-2 text-muted-foreground">Or sign in normally</span>
+                </div>
+              </div>
+
               <div>
                 <Label htmlFor="signin-email">Email</Label>
                 <Input

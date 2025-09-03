@@ -104,6 +104,11 @@ const Index = () => {
           </div>
         </div>
 
+        {/* AI Recommendations Section */}
+        <div className="mt-8">
+          <AIRecommendations />
+        </div>
+
         {/* Footer */}
         <div className="text-center mt-8 text-sm text-muted-foreground">
           <p>Made with ❤️ for emotional connection • Real-time global moods</p>

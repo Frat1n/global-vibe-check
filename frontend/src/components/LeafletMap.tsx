@@ -12,8 +12,8 @@
  * - Tooltip showing mood details on hover
  */
 
-import React, { useEffect, useState } from 'react';
-import { MapContainer, TileLayer, CircleMarker, Popup, useMap } from 'react-leaflet';
+import React, { useEffect, useState, useMemo } from 'react';
+import { MapContainer, TileLayer, CircleMarker, Popup } from 'react-leaflet';
 import { MoodEntry, MoodType } from '@/types/mood';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
@@ -52,42 +52,29 @@ interface LeafletMapProps {
 }
 
 /**
- * Component to fit map bounds to show all mood markers
- */
-const MapBounds: React.FC<{ moodEntries: MoodEntry[] }> = ({ moodEntries }) => {
-  const map = useMap();
-
-  useEffect(() => {
-    if (moodEntries.length > 0) {
-      // Create bounds from all mood entry locations
-      const bounds = L.latLngBounds(
-        moodEntries.map(entry => [entry.lat, entry.lng])
-      );
-      
-      // Fit map to show all mood markers with padding
-      map.fitBounds(bounds, { padding: [20, 20] });
-    } else {
-      // Default view centered on world
-      map.setView([20, 0], 2);
-    }
-  }, [moodEntries, map]);
-
-  return null;
-};
-
-/**
  * LeafletMap - Interactive geographic map showing mood concentrations
  */
 const LeafletMap: React.FC<LeafletMapProps> = ({ 
   moodEntries, 
   height = "100%" 
 }) => {
-  const [mapKey, setMapKey] = useState(0);
+  const [mapKey] = useState(0);
 
-  // Force map re-render when mood data changes significantly
-  useEffect(() => {
-    setMapKey(prev => prev + 1);
-  }, [moodEntries.length]);
+  // Memoize map center and bounds calculation
+  const mapConfig = useMemo(() => {
+    if (moodEntries.length === 0) {
+      return { center: [20, 0] as [number, number], zoom: 2 };
+    }
+
+    // Calculate center from mood entries
+    const latSum = moodEntries.reduce((sum, entry) => sum + entry.lat, 0);
+    const lngSum = moodEntries.reduce((sum, entry) => sum + entry.lng, 0);
+    
+    return {
+      center: [latSum / moodEntries.length, lngSum / moodEntries.length] as [number, number],
+      zoom: moodEntries.length > 1 ? 4 : 6
+    };
+  }, [moodEntries]);
 
   return (
     <div className="w-full h-full relative rounded-lg overflow-hidden">
@@ -120,8 +107,8 @@ const LeafletMap: React.FC<LeafletMapProps> = ({
       {/* Leaflet Map Container */}
       <MapContainer
         key={mapKey}
-        center={[20, 0]}
-        zoom={2}
+        center={mapConfig.center}
+        zoom={mapConfig.zoom}
         style={{ height, width: '100%' }}
         className="rounded-lg"
         zoomControl={true}
@@ -133,9 +120,6 @@ const LeafletMap: React.FC<LeafletMapProps> = ({
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
           maxZoom={18}
         />
-        
-        {/* Auto-fit bounds to show all mood markers */}
-        <MapBounds moodEntries={moodEntries} />
 
         {/* Render mood markers */}
         {moodEntries.map((entry, index) => {

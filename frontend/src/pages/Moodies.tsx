@@ -72,7 +72,9 @@ const Moodies: React.FC = () => {
   const fetchMoodieStats = async () => {
     try {
       setLoading(true);
-      const backendUrl = import.meta.env.REACT_APP_BACKEND_URL || 'http://localhost:8001';
+      const backendUrl = import.meta.env.VITE_REACT_APP_BACKEND_URL || 
+                         process.env.REACT_APP_BACKEND_URL || 
+                         'https://emote-mapper.preview.emergentagent.com';
       
       // Fetch basic moodies to calculate stats
       const response = await fetch(`${backendUrl}/api/moodies?limit=1000`);

@@ -191,8 +191,9 @@ async def get_ai_mood_recommendations(user_id: str, recent_moods: List[str]) -> 
     Uses Emergent LLM integration for personalized suggestions
     """
     try:
-        if not EMERGENT_LLM_KEY:
-            return []
+        if not EMERGENT_LLM_KEY or not openai_assistant:
+            # Return fallback recommendations when AI is not available
+            return get_fallback_recommendations(recent_moods)
         
         # Create prompt for mood-based recommendations
         mood_context = ", ".join(recent_moods[-5:])  # Last 5 moods
@@ -221,7 +222,57 @@ async def get_ai_mood_recommendations(user_id: str, recent_moods: List[str]) -> 
         
     except Exception as e:
         logging.error(f"AI recommendation error: {e}")
-        return []
+        return get_fallback_recommendations(recent_moods)
+
+def get_fallback_recommendations(recent_moods: List[str]) -> List[Dict]:
+    """
+    Provide fallback recommendations when AI is not available
+    """
+    # Analyze mood patterns
+    mood_counts = {}
+    for mood in recent_moods:
+        mood_counts[mood] = mood_counts.get(mood, 0) + 1
+    
+    # Determine dominant mood
+    dominant_mood = max(mood_counts.keys(), default="neutral") if mood_counts else "neutral"
+    
+    # Provide contextual recommendations based on dominant mood
+    if dominant_mood in ["sad", "stressed", "anxious"]:
+        return [
+            {
+                "activity": "Take a 10-minute mindfulness walk",
+                "explanation": "Fresh air and gentle movement can help shift your perspective and reduce stress naturally.",
+                "mood_benefit": "Reduces anxiety and improves mood"
+            },
+            {
+                "activity": "Practice deep breathing exercises",
+                "explanation": "Controlled breathing activates your parasympathetic nervous system, promoting calm and relaxation.",
+                "mood_benefit": "Decreases stress and promotes inner peace"
+            },
+            {
+                "activity": "Listen to uplifting music or nature sounds",
+                "explanation": "Music therapy can significantly impact emotional state and provide comfort during difficult times.",
+                "mood_benefit": "Elevates mood and provides emotional support"
+            }
+        ]
+    else:
+        return [
+            {
+                "activity": "Share your positive energy with others",
+                "explanation": "Connecting with friends or family can amplify your good mood and strengthen relationships.",
+                "mood_benefit": "Maintains happiness and builds social connections"
+            },
+            {
+                "activity": "Try a new creative activity",
+                "explanation": "Engaging in creative pursuits while feeling good can lead to fulfilling discoveries and achievements.",
+                "mood_benefit": "Enhances joy and personal growth"
+            },
+            {
+                "activity": "Plan something to look forward to",
+                "explanation": "Setting positive future goals while in a good headspace helps maintain optimism and motivation.",
+                "mood_benefit": "Sustains positive outlook and excitement"
+            }
+        ]
 
 # API Endpoints
 

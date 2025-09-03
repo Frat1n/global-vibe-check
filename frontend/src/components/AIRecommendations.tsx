@@ -71,7 +71,9 @@ const AIRecommendations: React.FC<AIRecommendationsProps> = ({ className = '' })
       setLoading(true);
       setError(null);
 
-      const backendUrl = import.meta.env.REACT_APP_BACKEND_URL || 'http://localhost:8001';
+      const backendUrl = import.meta.env.VITE_REACT_APP_BACKEND_URL || 
+                         process.env.REACT_APP_BACKEND_URL || 
+                         'https://emote-mapper.preview.emergentagent.com';
       const userToken = localStorage.getItem('user_token') || user.id || 'demo_user';
 
       const response = await fetch(`${backendUrl}/api/recommendations`, {

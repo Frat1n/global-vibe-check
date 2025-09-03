@@ -39,16 +39,40 @@ BACKEND_URL = load_backend_url()
 API_BASE = f"{BACKEND_URL}/api"
 
 # Test configuration
-TEST_USER_ID = "test_user_123"
-TEST_USER_ID_2 = "test_user_456"
+TEST_EMAIL = "test@moodmaps.com"
+TEST_PASSWORD = "testpass123"
+TEST_DISPLAY_NAME = "Test User"
+TEST_EMAIL_2 = "test2@moodmaps.com"
+TEST_PASSWORD_2 = "testpass456"
+TEST_DISPLAY_NAME_2 = "Test User 2"
+
+# Global variables for authentication
+AUTH_TOKEN = None
+AUTH_TOKEN_2 = None
+TEST_USER_ID = None
+TEST_USER_ID_2 = None
+
 HEADERS = {
-    "Authorization": f"Bearer {TEST_USER_ID}",
     "Content-Type": "application/json"
 }
-HEADERS_USER2 = {
-    "Authorization": f"Bearer {TEST_USER_ID_2}",
-    "Content-Type": "application/json"
-}
+
+def get_auth_headers():
+    """Get headers with authentication token"""
+    if AUTH_TOKEN:
+        return {
+            "Authorization": f"Bearer {AUTH_TOKEN}",
+            "Content-Type": "application/json"
+        }
+    return HEADERS
+
+def get_auth_headers_2():
+    """Get headers with second user's authentication token"""
+    if AUTH_TOKEN_2:
+        return {
+            "Authorization": f"Bearer {AUTH_TOKEN_2}",
+            "Content-Type": "application/json"
+        }
+    return HEADERS
 
 # Test data
 MOOD_DATA = {
@@ -106,17 +130,140 @@ def test_health_check():
         print_test_result("Health Check Endpoint", False, f"Exception: {str(e)}")
         return False
 
-def test_mood_tracking():
-    """Test 2: Mood Tracking APIs"""
+def test_mongodb_authentication():
+    """Test 2: MongoDB Authentication System"""
     print("=" * 60)
-    print("TEST 2: MOOD TRACKING APIS")
+    print("TEST 2: MONGODB AUTHENTICATION")
+    print("=" * 60)
+    
+    global AUTH_TOKEN, AUTH_TOKEN_2, TEST_USER_ID, TEST_USER_ID_2
+    results = []
+    
+    # Test 2a: User Registration
+    try:
+        register_data = {
+            "email": TEST_EMAIL,
+            "password": TEST_PASSWORD,
+            "display_name": TEST_DISPLAY_NAME
+        }
+        
+        response = requests.post(f"{API_BASE}/auth/register", json=register_data, headers=HEADERS)
+        success = response.status_code == 200
+        
+        if success:
+            result = response.json()
+            TEST_USER_ID = result.get('user_id')
+            details = f"Status: {response.status_code}, User ID: {TEST_USER_ID}, Message: {result.get('message', 'No message')}"
+        else:
+            details = f"Status: {response.status_code}, Error: {response.text}"
+            
+        print_test_result("User Registration", success, details)
+        results.append(success)
+        
+    except Exception as e:
+        print_test_result("User Registration", False, f"Exception: {str(e)}")
+        results.append(False)
+    
+    # Test 2b: User Login
+    try:
+        login_data = {
+            "email": TEST_EMAIL,
+            "password": TEST_PASSWORD
+        }
+        
+        response = requests.post(f"{API_BASE}/auth/login", json=login_data, headers=HEADERS)
+        success = response.status_code == 200
+        
+        if success:
+            result = response.json()
+            AUTH_TOKEN = result.get('access_token')
+            user_data = result.get('user', {})
+            TEST_USER_ID = user_data.get('id')
+            details = f"Status: {response.status_code}, Token received: {'Yes' if AUTH_TOKEN else 'No'}, User: {user_data.get('email')}"
+        else:
+            details = f"Status: {response.status_code}, Error: {response.text}"
+            
+        print_test_result("User Login", success, details)
+        results.append(success)
+        
+    except Exception as e:
+        print_test_result("User Login", False, f"Exception: {str(e)}")
+        results.append(False)
+    
+    # Test 2c: Get Current User (requires authentication)
+    try:
+        if AUTH_TOKEN:
+            auth_headers = get_auth_headers()
+            response = requests.get(f"{API_BASE}/auth/me", headers=auth_headers)
+            success = response.status_code == 200
+            
+            if success:
+                user_data = response.json()
+                details = f"Status: {response.status_code}, User: {user_data.get('email')}, Verified: {user_data.get('is_verified')}"
+            else:
+                details = f"Status: {response.status_code}, Error: {response.text}"
+        else:
+            success = False
+            details = "No auth token available from login"
+            
+        print_test_result("Get Current User", success, details)
+        results.append(success)
+        
+    except Exception as e:
+        print_test_result("Get Current User", False, f"Exception: {str(e)}")
+        results.append(False)
+    
+    # Test 2d: Register Second User for Social Features Testing
+    try:
+        register_data_2 = {
+            "email": TEST_EMAIL_2,
+            "password": TEST_PASSWORD_2,
+            "display_name": TEST_DISPLAY_NAME_2
+        }
+        
+        response = requests.post(f"{API_BASE}/auth/register", json=register_data_2, headers=HEADERS)
+        success = response.status_code == 200
+        
+        if success:
+            result = response.json()
+            TEST_USER_ID_2 = result.get('user_id')
+            
+            # Login second user to get token
+            login_data_2 = {
+                "email": TEST_EMAIL_2,
+                "password": TEST_PASSWORD_2
+            }
+            
+            login_response = requests.post(f"{API_BASE}/auth/login", json=login_data_2, headers=HEADERS)
+            if login_response.status_code == 200:
+                login_result = login_response.json()
+                AUTH_TOKEN_2 = login_result.get('access_token')
+                TEST_USER_ID_2 = login_result.get('user', {}).get('id')
+            
+            details = f"Status: {response.status_code}, Second user registered and logged in"
+        else:
+            details = f"Status: {response.status_code}, Error: {response.text}"
+            
+        print_test_result("Register Second User", success, details)
+        results.append(success)
+        
+    except Exception as e:
+        print_test_result("Register Second User", False, f"Exception: {str(e)}")
+        results.append(False)
+    
+    return all(results)
+
+def test_mood_tracking():
+    """Test 3: Mood Tracking APIs"""
+    print("=" * 60)
+    print("TEST 3: MOOD TRACKING APIS")
     print("=" * 60)
     
     results = []
     
-    # Test 2a: Create mood entry
+    # Test 3a: Create mood entry
     try:
-        response = requests.post(f"{API_BASE}/moods", json=MOOD_DATA, headers=HEADERS)
+        response = requests.post(f"{API_BASE}/moods", json=MOOD_DATA, headers=get_auth_headers())
         success = response.status_code == 200
         
         if success:
@@ -134,9 +281,9 @@ def test_mood_tracking():
         print_test_result("Create Mood Entry", False, f"Exception: {str(e)}")
         results.append(False)
     
-    # Test 2b: Create second mood entry for testing
+    # Test 3b: Create second mood entry for testing
     try:
-        response = requests.post(f"{API_BASE}/moods", json=MOOD_DATA_2, headers=HEADERS)
+        response = requests.post(f"{API_BASE}/moods", json=MOOD_DATA_2, headers=get_auth_headers())
         success = response.status_code == 200
         print_test_result("Create Second Mood Entry", success, f"Status: {response.status_code}")
         results.append(success)
@@ -145,9 +292,9 @@ def test_mood_tracking():
         print_test_result("Create Second Mood Entry", False, f"Exception: {str(e)}")
         results.append(False)
     
-    # Test 2c: Get user's mood entries
+    # Test 3c: Get user's mood entries
     try:
-        response = requests.get(f"{API_BASE}/moods", headers=HEADERS)
+        response = requests.get(f"{API_BASE}/moods", headers=get_auth_headers())
         success = response.status_code == 200
         
         if success:
@@ -163,7 +310,7 @@ def test_mood_tracking():
         print_test_result("Get User Mood Entries", False, f"Exception: {str(e)}")
         results.append(False)
     
-    # Test 2d: Get public mood entries
+    # Test 3d: Get public mood entries
     try:
         response = requests.get(f"{API_BASE}/moods/public")
         success = response.status_code == 200
@@ -184,21 +331,21 @@ def test_mood_tracking():
     return all(results)
 
 def test_social_features():
-    """Test 3: Social Features - Likes and Comments"""
+    """Test 4: Social Features - Likes and Comments"""
     print("=" * 60)
-    print("TEST 3: SOCIAL FEATURES")
+    print("TEST 4: SOCIAL FEATURES")
     print("=" * 60)
     
     results = []
     
-    # Test 3a: Like a mood entry
+    # Test 4a: Like a mood entry
     try:
         like_data = {
             "content_id": created_mood_id if 'created_mood_id' in globals() else "test_mood_id",
             "content_type": "mood"
         }
         
-        response = requests.post(f"{API_BASE}/like", params=like_data, headers=HEADERS_USER2)
+        response = requests.post(f"{API_BASE}/like", params=like_data, headers=get_auth_headers_2())
         success = response.status_code == 200
         
         if success:
@@ -214,7 +361,7 @@ def test_social_features():
         print_test_result("Like Content", False, f"Exception: {str(e)}")
         results.append(False)
     
-    # Test 3b: Create a comment
+    # Test 4b: Create a comment
     try:
         comment_data = {
             "content_id": created_mood_id if 'created_mood_id' in globals() else "test_mood_id",
@@ -222,7 +369,7 @@ def test_social_features():
             "text": "Great mood! Keep it up! 😊"
         }
         
-        response = requests.post(f"{API_BASE}/comments", params=comment_data, headers=HEADERS_USER2)
+        response = requests.post(f"{API_BASE}/comments", params=comment_data, headers=get_auth_headers_2())
         success = response.status_code == 200
         
         if success:
@@ -241,13 +388,13 @@ def test_social_features():
     return all(results)
 
 def test_ai_recommendations():
-    """Test 4: AI Recommendations"""
+    """Test 5: AI Recommendations"""
     print("=" * 60)
-    print("TEST 4: AI RECOMMENDATIONS")
+    print("TEST 5: AI RECOMMENDATIONS")
     print("=" * 60)
     
     try:
-        response = requests.get(f"{API_BASE}/recommendations", headers=HEADERS)
+        response = requests.get(f"{API_BASE}/recommendations", headers=get_auth_headers())
         success = response.status_code == 200
         
         if success:
@@ -265,9 +412,9 @@ def test_ai_recommendations():
         return False
 
 def test_video_moodies():
-    """Test 5: Video Moodies Upload"""
+    """Test 6: Video Moodies Upload"""
     print("=" * 60)
-    print("TEST 5: VIDEO MOODIES")
+    print("TEST 6: VIDEO MOODIES")
     print("=" * 60)
     
     try:
@@ -286,7 +433,7 @@ def test_video_moodies():
         }
         
         # Remove Content-Type header for multipart upload
-        auth_headers = {"Authorization": f"Bearer {TEST_USER_ID}"}
+        auth_headers = {"Authorization": f"Bearer {AUTH_TOKEN}"} if AUTH_TOKEN else {}
         
         response = requests.post(f"{API_BASE}/moodies", data=form_data, files=files, headers=auth_headers)
         success = response.status_code == 200
@@ -305,21 +452,21 @@ def test_video_moodies():
         return False
 
 def test_private_messages():
-    """Test 6: Private Messages"""
+    """Test 7: Private Messages"""
     print("=" * 60)
-    print("TEST 6: PRIVATE MESSAGES")
+    print("TEST 7: PRIVATE MESSAGES")
     print("=" * 60)
     
     results = []
     
-    # Test 6a: Send private message
+    # Test 7a: Send private message
     try:
         message_data = {
             "recipient_id": TEST_USER_ID_2,
             "message": "Hey! How are you feeling today? 😊"
         }
         
-        response = requests.post(f"{API_BASE}/messages", params=message_data, headers=HEADERS)
+        response = requests.post(f"{API_BASE}/messages", params=message_data, headers=get_auth_headers())
         success = response.status_code == 200
         
         if success:
@@ -335,9 +482,9 @@ def test_private_messages():
         print_test_result("Send Private Message", False, f"Exception: {str(e)}")
         results.append(False)
     
-    # Test 6b: Get private messages
+    # Test 7b: Get private messages
     try:
-        response = requests.get(f"{API_BASE}/messages", headers=HEADERS)
+        response = requests.get(f"{API_BASE}/messages", headers=get_auth_headers())
         success = response.status_code == 200
         
         if success:
@@ -370,6 +517,7 @@ def run_all_tests():
     test_results = {}
     
     test_results['health_check'] = test_health_check()
+    test_results['mongodb_authentication'] = test_mongodb_authentication()
     test_results['mood_tracking'] = test_mood_tracking()
     test_results['social_features'] = test_social_features()
     test_results['ai_recommendations'] = test_ai_recommendations()

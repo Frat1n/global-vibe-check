@@ -101,7 +101,7 @@ const MoodiesFeed: React.FC<MoodiesFeedProps> = ({
       setError(null);
 
       const backendUrl = import.meta.env.REACT_APP_BACKEND_URL || 'http://localhost:8001';
-      const userToken = localStorage.getItem('user_token') || 'demo_user_123';
+      const userToken = localStorage.getItem('auth_token') || 'demo_user_123';
 
       // Build API URL with mood filter
       let apiUrl = `${backendUrl}/api/moodies?limit=20`;

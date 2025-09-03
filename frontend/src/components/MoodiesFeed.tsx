@@ -136,59 +136,6 @@ const MoodiesFeed: React.FC<MoodiesFeedProps> = ({
   };
 
   /**
-   * Generate sample moodies for demonstration
-   */
-  const getSampleMoodies = (): Moodie[] => {
-    return [
-      {
-        id: 'sample-1',
-        user_id: 'user_1',
-        title: 'Morning Sunshine Vibes ☀️',
-        description: 'Starting the day with positive energy!',
-        video_data: 'sample_video_1',
-        mood_tags: ['happy', 'excited'],
-        duration: 15,
-        likes_count: 42,
-        comments_count: 8,
-        shares_count: 5,
-        views_count: 156,
-        created_at: new Date(Date.now() - 3600000).toISOString(),
-        is_public: true,
-      },
-      {
-        id: 'sample-2',
-        user_id: 'user_2',
-        title: 'Rainy Day Feels 🌧️',
-        description: 'Sometimes it\'s okay to feel a little blue',
-        video_data: 'sample_video_2',
-        mood_tags: ['sad', 'calm'],
-        duration: 22,
-        likes_count: 28,
-        comments_count: 12,
-        shares_count: 3,
-        views_count: 89,
-        created_at: new Date(Date.now() - 7200000).toISOString(),
-        is_public: true,
-      },
-      {
-        id: 'sample-3',
-        user_id: 'user_3',
-        title: 'Workout Energy! 💪',
-        description: 'Pushing through the stress with some exercise',
-        video_data: 'sample_video_3',
-        mood_tags: ['stressed', 'excited'],
-        duration: 18,
-        likes_count: 67,
-        comments_count: 15,
-        shares_count: 9,
-        views_count: 234,
-        created_at: new Date(Date.now() - 10800000).toISOString(),
-        is_public: true,
-      },
-    ];
-  };
-
-  /**
    * Handle video play/pause
    */
   const toggleVideoPlayback = (moodieId: string) => {

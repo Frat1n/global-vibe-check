@@ -2,7 +2,7 @@
 import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { LogIn, LogOut } from 'lucide-react';
+import { LogIn, LogOut, Video } from 'lucide-react';
 import MoodSelector from '@/components/MoodSelector';
 import MoodMap from '@/components/MoodMap';
 import LeafletMap from '@/components/LeafletMap';

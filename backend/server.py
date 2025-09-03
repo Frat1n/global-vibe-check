@@ -163,15 +163,21 @@ class AIRecommendation(BaseModel):
 async def verify_user_token(credentials: HTTPAuthorizationCredentials = Depends(security)) -> str:
     """
     Verify user authentication token and return user_id
-    In a real implementation, this would validate JWT tokens
-    For now, we'll use a simple token format: "user_id"
+    Uses our MongoDB-based JWT authentication system
     """
     try:
-        # Simple token validation - in production, use proper JWT validation
-        user_id = credentials.credentials
+        user_id = auth_service.verify_token(credentials.credentials)
         if not user_id:
-            raise HTTPException(status_code=401, detail="Invalid authentication token")
+            raise HTTPException(status_code=401, detail="Invalid or expired authentication token")
+        
+        # Check if user exists in database
+        user = await auth_service.get_user_by_id(user_id)
+        if not user:
+            raise HTTPException(status_code=401, detail="User not found")
+            
         return user_id
+    except HTTPException:
+        raise
     except Exception:
         raise HTTPException(status_code=401, detail="Invalid authentication token")
 

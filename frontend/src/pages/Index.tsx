@@ -11,7 +11,7 @@ import AIRecommendations from '@/components/AIRecommendations';
 import PremiumModal from '@/components/PremiumModal';
 import MessagingModal from '@/components/MessagingModal';
 import { useMoodData } from '@/hooks/useMoodData';
-import { useAuth } from '@/contexts/AuthContext';
+import { useAuth } from '@/contexts/MongoAuthContext';
 
 const Index = () => {
   const { moodEntries, stats, isSubmitting, submitMood } = useMoodData();

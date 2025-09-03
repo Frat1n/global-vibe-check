@@ -3,16 +3,17 @@
 MoodMaps Backend API Test Suite
 
 Comprehensive testing for the MoodMaps social emotional platform backend.
-Tests all major API endpoints including mood tracking, social features, 
-AI recommendations, video uploads, and private messaging.
+Tests all major API endpoints including MongoDB authentication, mood tracking, 
+social features, AI recommendations, video uploads, and private messaging.
 
 Test Priority:
 1. Basic Health Check - GET /api/
-2. Mood Tracking APIs - POST /api/moods, GET /api/moods, GET /api/moods/public
-3. Social Features - POST /api/like, POST /api/comments
-4. AI Recommendations - GET /api/recommendations
-5. Video Moodies - POST /api/moodies
-6. Private Messages - POST /api/messages, GET /api/messages
+2. MongoDB Authentication - POST /api/auth/register, POST /api/auth/login, GET /api/auth/me
+3. Mood Tracking APIs - POST /api/moods, GET /api/moods, GET /api/moods/public
+4. Social Features - POST /api/like, POST /api/comments
+5. AI Recommendations - GET /api/recommendations
+6. Video Moodies - POST /api/moodies
+7. Private Messages - POST /api/messages, GET /api/messages
 """
 
 import requests

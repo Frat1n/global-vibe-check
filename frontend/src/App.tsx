@@ -13,7 +13,7 @@ const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <AuthProvider>
+    <MongoAuthProvider>
       <TooltipProvider>
         <Toaster />
         <Sonner />
@@ -27,7 +27,7 @@ const App = () => (
           </Routes>
         </BrowserRouter>
       </TooltipProvider>
-    </AuthProvider>
+    </MongoAuthProvider>
   </QueryClientProvider>
 );
 

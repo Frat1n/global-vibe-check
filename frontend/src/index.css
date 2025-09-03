@@ -3,6 +3,9 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Import Leaflet CSS for mapping functionality */
+@import 'leaflet/dist/leaflet.css';
+
 /* MoodMaps Design System - Emotional Color Palette & Styles */
 
 @layer base {

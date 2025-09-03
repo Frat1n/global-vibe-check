@@ -100,7 +100,9 @@ const MoodiesFeed: React.FC<MoodiesFeedProps> = ({
       setLoading(true);
       setError(null);
 
-      const backendUrl = import.meta.env.REACT_APP_BACKEND_URL || 'http://localhost:8001';
+      const backendUrl = import.meta.env.VITE_REACT_APP_BACKEND_URL || 
+                         process.env.REACT_APP_BACKEND_URL || 
+                         'https://emote-mapper.preview.emergentagent.com';
       const userToken = localStorage.getItem('auth_token') || 'demo_user_123';
 
       // Build API URL with mood filter

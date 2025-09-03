@@ -196,7 +196,15 @@ class AuthService:
         """Get user by ID"""
         user = await self.db.users.find_one({'id': user_id})
         if user:
-            # Remove sensitive data
+            # Remove sensitive data and MongoDB ObjectId
             user.pop('password_hash', None)
             user.pop('verification_token', None)
+            user.pop('_id', None)  # Remove MongoDB ObjectId
+            
+            # Convert datetime objects to ISO strings for JSON serialization
+            if 'created_at' in user and user['created_at']:
+                user['created_at'] = user['created_at'].isoformat()
+            if 'updated_at' in user and user['updated_at']:
+                user['updated_at'] = user['updated_at'].isoformat()
+                
         return user

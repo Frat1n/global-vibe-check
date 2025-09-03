@@ -224,7 +224,7 @@ async def get_ai_mood_recommendations(user_id: str, recent_moods: List[str]) -> 
 @api_router.get("/")
 async def root():
     """Health check endpoint"""
-    return {"message": "MoodMaps API v2.0 - Social Emotional Platform"}
+    return {"message": "MoodMaps API v2.0 - Social Emotional Platform with MongoDB Authentication"}
 
 # Mood Tracking Endpoints
 @api_router.post("/moods", response_model=MoodEntry)

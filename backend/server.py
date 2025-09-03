@@ -46,13 +46,16 @@ mongo_url = os.environ['MONGO_URL']
 client = AsyncIOMotorClient(mongo_url)
 db = client[os.environ['DB_NAME']]
 
+# Initialize authentication service
+auth_service = AuthService(db)
+
 # AI Integration setup
 EMERGENT_LLM_KEY = os.environ.get('EMERGENT_LLM_KEY')
 
 # Create the main app
 app = FastAPI(
     title="MoodMaps API",
-    description="Social emotional sharing platform with AI-powered recommendations",
+    description="Social emotional sharing platform with MongoDB authentication and AI-powered recommendations",
     version="2.0.0"
 )
 

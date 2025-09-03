@@ -23,4 +23,8 @@ numpy>=1.26.0
 python-multipart>=0.0.9
 jq>=1.6.0
 typer>=0.9.0
+emergentintegrations>=0.1.0
+opencv-python>=4.8.0
+Pillow>=10.0.0
+reverse-geocoder>=1.5.1
 leaflet==1.9.4

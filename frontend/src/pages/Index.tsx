@@ -7,6 +7,7 @@ import MoodSelector from '@/components/MoodSelector';
 import MoodMap from '@/components/MoodMap';
 import LeafletMap from '@/components/LeafletMap';
 import MoodStats from '@/components/MoodStats';
+import AIRecommendations from '@/components/AIRecommendations';
 import PremiumModal from '@/components/PremiumModal';
 import MessagingModal from '@/components/MessagingModal';
 import { useMoodData } from '@/hooks/useMoodData';

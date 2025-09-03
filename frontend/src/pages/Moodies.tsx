@@ -15,7 +15,7 @@
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { useAuth } from '@/contexts/AuthContext';
+import { useAuth } from '@/contexts/MongoAuthContext';
 import { useNavigate } from 'react-router-dom';
 import MoodiesFeed from '@/components/MoodiesFeed';
 import MoodieUpload from '@/components/MoodieUpload';

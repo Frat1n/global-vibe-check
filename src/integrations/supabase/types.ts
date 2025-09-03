@@ -157,12 +157,37 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      get_public_mood_data: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          approximate_lat: number
+          approximate_lng: number
+          city: string
+          country: string
+          created_date: string
+          entry_count: number
+          mood: string
+        }[]
+      }
       get_public_profile: {
         Args: { profile_user_id: string }
         Returns: {
           avatar_url: string
           display_name: string
           user_id: string
+        }[]
+      }
+      get_user_mood_history: {
+        Args: { limit_count?: number }
+        Returns: {
+          city: string
+          country: string
+          created_at: string
+          id: string
+          latitude: number
+          longitude: number
+          message: string
+          mood: string
         }[]
       }
     }

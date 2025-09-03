@@ -26,28 +26,68 @@ export const useMoodData = () => {
   // Fetch mood entries from Supabase
   const fetchMoodEntries = async () => {
     try {
-      const { data, error } = await supabase
-        .from('mood_entries')
-        .select('*')
-        .order('created_at', { ascending: false })
-        .limit(100);
+      // Fetch anonymized public mood data for map and stats
+      const { data: publicData, error: publicError } = await supabase.rpc('get_public_mood_data');
+      
+      if (publicError) throw publicError;
 
-      if (error) throw error;
-
-      const formattedEntries: MoodEntry[] = data.map(entry => ({
-        id: entry.id,
+      // Convert public data to MoodEntry format for compatibility
+      const publicEntries: MoodEntry[] = (publicData || []).map(entry => ({
+        id: `${entry.mood}-${entry.city}-${entry.created_date}`, // Generate synthetic ID
         mood: entry.mood as MoodType,
-        message: entry.message,
-        lat: entry.latitude,
-        lng: entry.longitude,
-        timestamp: new Date(entry.created_at),
+        message: null, // No personal messages in public data
+        lat: entry.approximate_lat,
+        lng: entry.approximate_lng,
+        timestamp: new Date(entry.created_date),
         city: entry.city,
         country: entry.country,
       }));
 
-      setMoodEntries(formattedEntries);
+      // If user is logged in, also fetch their own detailed entries
+      if (user) {
+        const { data: userEntries, error: userError } = await supabase.rpc('get_user_mood_history');
+        
+        if (userError) {
+          console.error('Error fetching user entries:', userError);
+        } else {
+          // Combine user's detailed entries with anonymized public data
+          const userMoodEntries: MoodEntry[] = (userEntries || []).map(entry => ({
+            id: entry.id,
+            mood: entry.mood as MoodType,
+            message: entry.message,
+            lat: entry.latitude,
+            lng: entry.longitude,
+            timestamp: new Date(entry.created_at),
+            city: entry.city,
+            country: entry.country,
+          }));
+          
+          // Filter out potential duplicates and combine
+          const combinedEntries = [
+            ...userMoodEntries,
+            ...publicEntries.filter(entry => 
+              // Avoid duplicating user's own entries in public data
+              !userMoodEntries.some(userEntry => 
+                Math.abs(userEntry.lat - entry.lat) < 0.01 &&
+                Math.abs(userEntry.lng - entry.lng) < 0.01 &&
+                userEntry.mood === entry.mood
+              )
+            )
+          ];
+          setMoodEntries(combinedEntries);
+          return;
+        }
+      }
+
+      // If not logged in or user entries failed, just use public data
+      setMoodEntries(publicEntries);
     } catch (error) {
       console.error('Error fetching mood entries:', error);
+      toast({
+        title: "Error",
+        description: "Failed to load mood data. Please try again.",
+        variant: "destructive",
+      });
     }
   };
 
@@ -157,7 +197,7 @@ export const useMoodData = () => {
       
       toast({
         title: "Mood Shared!",
-        description: "Your mood has been added to the global map.",
+        description: "Your mood has been added to your personal history.",
       });
     } catch (error) {
       console.error('Failed to submit mood:', error);
@@ -181,16 +221,19 @@ export const useMoodData = () => {
     setStats(calculateStats(moodEntries));
   }, [moodEntries]);
 
-  // Set up real-time subscription for new mood entries
+  // Set up real-time subscription for new mood entries (user's own entries only)
   useEffect(() => {
+    if (!user) return;
+
     const channel = supabase
-      .channel('mood_entries_changes')
+      .channel('user_mood_entries_changes')
       .on(
         'postgres_changes',
         {
           event: 'INSERT',
           schema: 'public',
-          table: 'mood_entries'
+          table: 'mood_entries',
+          filter: `user_id=eq.${user.id}` // Only subscribe to user's own entries
         },
         (payload) => {
           const newEntry: MoodEntry = {
@@ -212,7 +255,7 @@ export const useMoodData = () => {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, []);
+  }, [user]);
 
   return {
     moodEntries,

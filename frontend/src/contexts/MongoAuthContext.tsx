@@ -56,7 +56,9 @@ export const MongoAuthProvider: React.FC<{ children: React.ReactNode }> = ({ chi
 
   // Get backend URL from environment
   const getBackendUrl = () => {
-    return import.meta.env.REACT_APP_BACKEND_URL || 'http://localhost:8001';
+    return import.meta.env.VITE_REACT_APP_BACKEND_URL || 
+           process.env.REACT_APP_BACKEND_URL || 
+           'https://emote-mapper.preview.emergentagent.com';
   };
 
   // Get stored token

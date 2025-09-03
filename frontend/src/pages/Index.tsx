@@ -83,9 +83,9 @@ const Index = () => {
             <MoodSelector onSubmit={submitMood} isSubmitting={isSubmitting} />
           </div>
 
-          {/* Center - Map */}
+          {/* Center - Real Geographic Map */}
           <div className="lg:col-span-1">
-            <MoodMap moodEntries={moodEntries} />
+            <LeafletMap moodEntries={moodEntries} />
           </div>
 
           {/* Right Panel - Stats */}

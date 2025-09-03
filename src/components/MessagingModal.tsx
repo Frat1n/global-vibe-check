@@ -160,24 +160,21 @@ const MessagingModal = () => {
               <div className="space-y-2">
                 {profiles.map((prof) => (
                   <div
-                    key={prof.id}
+                    key={prof.user_id}
                     className={`p-3 rounded-lg cursor-pointer transition-colors hover:bg-muted/50 ${
-                      selectedProfile?.id === prof.id ? 'bg-muted' : ''
+                      selectedProfile?.user_id === prof.user_id ? 'bg-muted' : ''
                     }`}
                     onClick={() => setSelectedProfile(prof)}
                   >
                     <div className="flex items-center gap-3">
                       <Avatar className="w-8 h-8">
                         <AvatarFallback>
-                          {prof.display_name?.[0]?.toUpperCase() || prof.email[0].toUpperCase()}
+                          {prof.display_name?.[0]?.toUpperCase() || 'U'}
                         </AvatarFallback>
                       </Avatar>
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-medium truncate">
-                          {prof.display_name || prof.email.split('@')[0]}
-                        </p>
-                        <p className="text-xs text-muted-foreground truncate">
-                          {prof.email}
+                          {prof.display_name || 'Anonymous User'}
                         </p>
                       </div>
                     </div>
@@ -194,15 +191,12 @@ const MessagingModal = () => {
                 <div className="flex items-center gap-3 mb-4 pb-3 border-b border-border/50">
                   <Avatar>
                     <AvatarFallback>
-                      {selectedProfile.display_name?.[0]?.toUpperCase() || selectedProfile.email[0].toUpperCase()}
+                      {selectedProfile.display_name?.[0]?.toUpperCase() || 'U'}
                     </AvatarFallback>
                   </Avatar>
                   <div>
                     <p className="font-medium">
-                      {selectedProfile.display_name || selectedProfile.email.split('@')[0]}
-                    </p>
-                    <p className="text-xs text-muted-foreground">
-                      {selectedProfile.email}
+                      {selectedProfile.display_name || 'Anonymous User'}
                     </p>
                   </div>
                 </div>

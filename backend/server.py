@@ -31,8 +31,8 @@ import uuid
 from datetime import datetime, timedelta
 import json
 
-# Import AI capabilities
-from emergentintegrations.llm import openai_assistant
+# Import AI capabilities (temporarily disabled due to import issues)
+# from emergentintegrations.llm import openai_assistant
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
